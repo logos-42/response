@@ -1,0 +1,219 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\definecolor{reviewercolor}{RGB}{0,0,160}
+\definecolor{responsecolor}{RGB}{0,100,0}
+
+\newcommand{\reviewercomment}[1]{%
+  \vspace{6pt}\noindent\textbf{\textcolor{reviewercolor}{Reviewer's Comment:}}\\
+  \textcolor{reviewercolor}{\itshape #1}\vspace{4pt}}
+
+\newcommand{\response}[1]{%
+  \noindent\textbf{\textcolor{responsecolor}{Authors' Response:}}\\
+  #1\vspace{8pt}}
+
+\newcommand{\revision}[1]{%
+  \noindent\textbf{Revision in Manuscript:} #1\vspace{4pt}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Response to Reviewer 1}\\[12pt]
+{\large Manuscript ID: electronics-4268609}\\[6pt]
+{\large\itshape Trusted Metadata-Coordinated Tiered Off-Chain Storage for\\
+Recovery-Safe and Low-Latency IoT Data Management}\\[12pt]
+\today
+\end{center}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{8pt}
+\noindent Dear Reviewer 1,
+
+\vspace{4pt}
+\noindent We sincerely thank you for your thorough and insightful review. Your detailed comments have been instrumental in strengthening the rigor, clarity, and practical relevance of our work. We have carefully addressed each concern, and the resulting revisions represent a substantially improved manuscript. Below we provide point-by-point responses.
+
+\vspace{12pt}
+
+%% ====================================================================
+\subsection*{Comment 1: Clarification of ``Sub-Millisecond Recovery'' and the Distinction Between Data-Plane and Audit-Visible Recovery}
+
+\reviewercomment{The paper reports service interruption times of 0.005--0.107\,ms for fault recovery and claims ``sub-millisecond service interruption.'' However, this figure is entirely from local simulations\ldots\ Does the author's ``sub-millisecond'' data plane recovery mean that after a failure, queries can immediately read the correct data, but on-chain audit records will only be immutably written several seconds later? If so, is the term ``recovery'' misleading to users/auditors?}
+
+\response{We fully agree that the original manuscript did not make this distinction clear enough, and we appreciate the reviewer for identifying this critical ambiguity.
+
+In the revised manuscript, we now \textbf{explicitly distinguish two recovery planes} throughout the paper:
+
+\begin{itemize}[nosep]
+\item \textbf{Data-plane recovery (query-visible):} The effective mapping pointer is restored locally and subsequent queries are served from the stable tier. This path does \emph{not} involve any on-chain synchronous verification and completes in sub-millisecond time regardless of chain latency.
+\item \textbf{Audit-trail recovery (audit-visible):} The rollback event is recorded on-chain through the next batched commit, finalizing the audit trail. The total audit-visible recovery time is approximately $0.04\,\text{ms (local)} + \Delta_{\text{chain}}$, where $\Delta_{\text{chain}} \in \{0.5,\;2,\;5\}\,$s for typical consortium chains.
+\end{itemize}
+
+To provide quantitative evidence for this distinction, we have added a new \textbf{Experiment E6 (Chain-Delay Sensitivity Analysis)} that parametrically varies the assumed chain-finality delay across 0.5\,s, 2\,s, and 5\,s. The results confirm that local data-plane recovery remains unchanged ($\sim$0.006--0.056\,ms) while audit-visible recovery is dominated by the chain delay. We have also added a new \textbf{Table~5 (Estimated Gap from Simulation to Real Deployment)} that decomposes recovery time into local and audit-visible components for each delay level.
+
+Throughout the revised paper, every instance of ``sub-millisecond recovery'' is now qualified with ``\emph{local data-plane}'' to avoid any misinterpretation. We have added explicit clarifications in the Abstract, Section~5.4 (E4 results), Section~6.4 (Discussion of recovery), and Section~7 (Conclusions).}
+
+\revision{Abstract (revised), Section~5.4 (new scope-of-recovery paragraph), new Section~5.7 (E6 chain-delay sensitivity), Table~5 (estimated deployment gap), Section~6.4 (two-plane decomposition), and Section~7 (qualified recovery claim).}
+
+%% ====================================================================
+\subsection*{Comment 2: Benefit--Complexity Ratio at Scale and Economic Justification}
+
+\reviewercomment{With a 50k object scale, the latency advantage shrinks from 29\% to 2\%. Does the author's complex five-phase coordination only bring less than 2\% benefit in real-world large-scale IoT deployments, while significantly increasing implementation complexity? Please provide the benefit-complexity ratio and explain at what number of objects this design becomes uneconomical.}
+
+\response{This is an excellent question. We have added a new \textbf{Experiment E8 (Benefit--Complexity Break-Even Analysis)} that explicitly addresses this concern.
+
+E8 sweeps the object count over $\{$1\,k, 5\,k, 10\,k, 20\,k, 50\,k$\}$ under fixed hot-tier share and computes both benefit metrics (latency reduction, hot-tier hit gain) and four operational cost proxies (retained-versions proxy, metadata-coordination-ops proxy, audit-delay proxy, redirect-state proxy). The analysis classifies each scale point as \emph{effective-benefit} or \emph{diminishing-return} using a paper-local operational criterion:
+
+\begin{itemize}[nosep]
+\item \textbf{1\,k--20\,k objects:} classified as \emph{effective-benefit} (latency reduction 7--33\%, hit gain 3--34 pp).
+\item \textbf{50\,k objects:} classified as \emph{diminishing-return} (latency reduction 2.7\%, hit gain 2.6 pp).
+\end{itemize}
+
+Importantly, the narrowing at 50\,k is a \emph{tier-capacity bottleneck}, not a coordination-mechanism failure. When less than 3\% of the object population fits in the hot tier, even perfect placement coordination cannot serve a meaningful share of queries at low latency. Deployments at this scale would need either a larger hot-tier capacity ratio or hierarchical sub-tiering.
+
+We also emphasize that even in the diminishing-return region, the coordination mechanism's \emph{consistency and integrity guarantees} (stale-read prevention, rollback safety, audit trail) remain fully active---these are not latency-dependent benefits. The break-even criterion is a configuration-dependent operational interpretation, not a universal economic threshold.}
+
+\revision{New Section~5.8 (E8 benefit--complexity break-even), new Figures~16--18 (benefit metrics, cost proxies, break-even regions), Section~6.3 (expanded scalability discussion with break-even paragraph), and new Section~6.6 (break-even interpretation).}
+
+%% ====================================================================
+\subsection*{Comment 3: Audit-Window Security and Prevention of Denial/Double-Crossing Attacks}
+
+\reviewercomment{How does the author's framework prevent attackers from using unfinalized states for denial or double-crossing within the audit window?}
+
+\response{We thank the reviewer for raising this important security concern. In the revised manuscript, we have added a new correctness property \textbf{``Audit-Window Isolation''} in Section~3.6 that directly addresses this.
+
+The key insight is that during the audit window (the interval between physical migration and on-chain commitment), the tentative tuple is in state \emph{Migrating} and is \textbf{not reachable from the query path}. The effective pointer remains on the predecessor stable tuple, so no query is served from an unfinalized mapping. The redirect controller activates the new pointer \emph{only} after the batch commit succeeds (Stage~3), ensuring that the audit window is invisible to data-plane operations.
+
+This means that an attacker cannot exploit the unfinalized state to redirect queries to a malicious or non-existent location, because the query resolver never observes uncommitted mappings. The data plane is completely decoupled from the commitment pipeline during the audit window.
+
+We acknowledge, however, that this analysis operates at the system-design level. A consortium-chain deployment would introduce additional attack surfaces (malicious endorsers, smart-contract bugs, network partitions) that are outside the current simulation scope. We have added a new \textbf{Section~6.7 (Security Scope and Threat-Model Boundaries)} that explicitly discusses what is and is not covered by the current protection goals.}
+
+\revision{Section~3.6 (new ``Audit-Window Isolation'' property), new Section~6.7 (security scope and threat-model boundaries).}
+
+%% ====================================================================
+\subsection*{Comment 4: Upper Limit of End-to-End Recovery Time Including Consensus Latency}
+
+\reviewercomment{Please provide the upper limit of end-to-end recovery time, including consensus latency, in a real-world blockchain environment.}
+
+\response{The new E6 chain-delay sensitivity experiment directly provides this estimate. Table~5 in the revised manuscript decomposes recovery time as follows:
+
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Chain delay} & \textbf{Local recovery (ms)} & \textbf{Audit-visible (ms)} & \textbf{Interpretation} \\
+\midrule
+0 (simulated)   & 0.005--0.041 & 0.005--0.041 & Baseline: audit = local \\
+0.5\,s          & 0.006--0.050 & 500--500.05 & Chain dominates \\
+2\,s            & 0.006--0.045 & 2\,000--2\,000.05 & Chain dominates \\
+5\,s            & 0.006--0.056 & 5\,000--5\,000.06 & Chain dominates \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The upper limit of end-to-end (audit-visible) recovery is therefore approximately $\Delta_{\text{chain}} + 0.06\,$ms, where $\Delta_{\text{chain}}$ is the chain-finality delay of the target platform. For Hyperledger Fabric under typical configurations, this is 0.5--5 seconds. This is now explicitly stated in the manuscript.}
+
+\revision{New Section~5.7 (E6 results), Table~5, and Section~6.4 (explicit upper-limit statement).}
+
+%% ====================================================================
+\subsection*{Comment 5: ``Estimated Gap from Simulation to Real Deployment'' Table and Sensitivity Analysis}
+
+\reviewercomment{The on-chain transaction latency of seconds differs significantly from the sub-millisecond latency in the simulation. The author should add an ``Estimated Gap from Simulation to Real Deployment'' table or a sensitivity analysis.}
+
+\response{We have addressed this suggestion directly. The revised manuscript includes:
+
+\begin{enumerate}[nosep]
+\item \textbf{Table~5 (Estimated Gap from Simulation to Real Deployment):} This table decomposes recovery time into local data-plane and audit-visible components across four chain-delay levels (0, 0.5\,s, 2\,s, 5\,s).
+\item \textbf{Section~5.7 (Chain-Delay Sensitivity, E6):} A full experiment that parametrically varies the assumed finality delay and reports average latency, P95 latency, hit ratio, and commit overhead under each delay level.
+\item \textbf{Figures~10--11:} Bar and line charts showing per-fault-type recovery under different chain delays.
+\end{enumerate}
+
+Additionally, we have added explicit ``simulated'' labels throughout the paper wherever commit latency values are reported, to clearly distinguish simulated registry-write costs from real on-chain transaction latencies.}
+
+\revision{New Table~5, new Section~5.7 (E6), Figures~10--11, and systematic labeling of ``simulated commit latency'' throughout Sections~4, 5, and 6.}
+
+%% ====================================================================
+\subsection*{Comment 6: Asymmetric Read/Write Latency Testing}
+
+\reviewercomment{In Section~6.5, the assumption of symmetric read/write latency simplifies the fact that real-world storage writes are typically slower. The authors should test with 2$\times$/5$\times$ write latency.}
+
+\response{We have implemented this suggestion in the current revision rather than deferring it. The E2 experiment has been extended with \textbf{asymmetric write-latency multipliers} of $2\times$ and $5\times$. Per-tier write costs are set to 2$\times$ (or 5$\times$) the corresponding read latency (e.g., hot-tier write at 2\,ms or 5\,ms vs.\ read at 1\,ms).
+
+Key findings:
+\begin{itemize}[nosep]
+\item Under 5$\times$ at 30/70 write ratio, the proposed method reaches 42.17\,ms while the baseline reaches 58.62\,ms---a 28\% latency reduction that preserves the symmetric-case advantage.
+\item Commit count and average batch size remain unchanged regardless of the write multiplier, confirming that the batching mechanism is write-cost-agnostic.
+\item P99 rises to 500\,ms at 5$\times$ with high write ratios (the cold-tier write penalty), but the proposed method retains a lower average and higher hot-tier hit ratio.
+\end{itemize}
+
+Three new figures (Figures~7--9) present average latency, tail latency, and commit overhead under asymmetric write costs.}
+
+\revision{Extended Section~5.3 (E2 with asymmetric write latency), new Figures~7--9, new Section~6.5 (discussion of asymmetric write-latency results).}
+
+%% ====================================================================
+\subsection*{Comment 7: P95 Distribution Analysis with Box Plots or CDF Curves}
+
+\reviewercomment{Figure~3 describes P95 as 100\,ms as a ``structural ceiling,'' but the shape of the P95 distribution may still differ across methods. The authors must supplement this with box plots or CDF curves for the 95th or 99th percentiles.}
+
+\response{We have added a new \textbf{Experiment E7 (Variable-Load Tail-Latency Analysis)} that provides exactly the requested distributional analysis. E7 varies the offered load over $\{$10, 25, 50, 75, 100$\}$ requests per tick and records every individual request latency.
+
+The revised manuscript now includes:
+\begin{itemize}[nosep]
+\item \textbf{Figure~12 (Boxplot):} Grouped boxplots with a broken y-axis separating the low-latency body (0--14\,ms) from the 100\,ms cold-tier ceiling, revealing that the proposed method's interquartile range extends from 1\,ms to 10\,ms while the baseline collapses to a single line at 10\,ms.
+\item \textbf{Figure~13 (CDF):} Overlaid CDF curves at each load level, showing that the proposed method's CDF rises faster below 20\,ms.
+\item \textbf{Figure~14 (Exceedance ratio):} Fraction of requests exceeding 50\,ms as a function of offered load.
+\item \textbf{Figure~15 (Backlog proxy):} Average pending latency under increasing load.
+\end{itemize}
+
+These results confirm that although P95 and P99 are identical across methods (capped by the cold-tier floor), the \emph{shape} of the distribution differs meaningfully---the proposed method concentrates a larger fraction of requests in the low-latency region.}
+
+\revision{New Section~4.3 (E7 setup), Section~4.4 (E7 metrics), new Section~5.6 (E7 results), Figures~12--15, and Section~6.5 (tail-latency discussion).}
+
+%% ====================================================================
+\subsection*{Comment 8: Variable Load Generator}
+
+\reviewercomment{The ``throughput'' metric in Section~6.6 acknowledges that all methods use 50 requests/ticks, lacking distinctiveness; the authors need to adopt a variable load generator.}
+
+\response{This has been addressed through Experiment E7. The variable-load tail-latency analysis varies the offered load over $\{$10, 25, 50, 75, 100$\}$ requests per tick and measures per-request latency, exceedance ratio, cold-tier served ratio, and backlog proxy at each load level for both the proposed method and the baseline.
+
+At 100 requests/tick, the proposed method achieves a hot-tier hit ratio of 0.44 versus 0.25 for the baseline, resulting in a lower average latency (24.73\,ms vs.\ 26.90\,ms). The exceedance and backlog metrics provide load-dependent discrimination that the fixed-tick throughput metric could not capture.}
+
+\revision{New Section~5.6 (E7 variable-load results), Figures~14--15.}
+
+%% ====================================================================
+\subsection*{Comment 9: Clear Labeling of Simulated Commit Latency and Discussion of Real-Chain Impact}
+
+\reviewercomment{The 0.07\,ms batch commit latency mentioned in the paper is a simulated value and should be clearly marked as ``simulated commit latency''. The paper should also discuss how end-to-end latency would affect mapping freshness and user experience if a real chain were used.}
+
+\response{We have systematically addressed this throughout the revised manuscript:
+
+\begin{enumerate}[nosep]
+\item Every mention of the 0.07\,ms commit latency now explicitly states that it is a ``\emph{simulated} registry-write cost inside the simulator'' and ``does \emph{not} represent a measured on-chain transaction latency.''
+\item Section~5.7 (E6 chain-delay sensitivity) evaluates coordination cost under assumed chain-finality delays of 0.5\,s, 2\,s, and 5\,s.
+\item Section~6.2 (batch coordination discussion) now includes a qualified interpretation noting that the per-batch latency figures are simulated and that the E5 ablation confirms the 50$\times$ overhead reduction is robust across experimental conditions.
+\item A new Section~6.7 (Deployability and Long-Term Scalability) discusses how real chain latency would affect mapping freshness, registry state expansion, communication overhead, and the structural bottleneck of fixed hot-tier share.
+\end{enumerate}}
+
+\revision{Systematic labeling in Sections~4.1, 4.4, 5.2, 5.4, 5.7; new Section~6.7 (deployability discussion).}
+
+%% ====================================================================
+\vspace{12pt}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{6pt}
+
+\noindent We hope these revisions adequately address your concerns. The changes have substantially strengthened the paper by adding four new experiments (E5--E8), six new figures, two new tables, and significant expansions to the discussion section. We are grateful for your constructive feedback and remain open to further suggestions.
+
+\vspace{12pt}
+\noindent Sincerely,\\
+The Authors
+
+\end{document}
