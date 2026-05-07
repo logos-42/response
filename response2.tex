@@ -1,0 +1,97 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\definecolor{reviewercolor}{RGB}{0,0,160}
+\definecolor{responsecolor}{RGB}{0,100,0}
+
+\newcommand{\reviewercomment}[1]{%
+  \vspace{6pt}\noindent\textbf{\textcolor{reviewercolor}{Reviewer's Comment:}}\\
+  \textcolor{reviewercolor}{\itshape #1}\vspace{4pt}}
+
+\newcommand{\response}[1]{%
+  \noindent\textbf{\textcolor{responsecolor}{Authors' Response:}}\\
+  #1\vspace{8pt}}
+
+\newcommand{\revision}[1]{%
+  \noindent\textbf{Revision in Manuscript:} #1\vspace{4pt}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Response to Reviewer 2}\\[12pt]
+{\large Manuscript ID: electronics-4268609}\\[6pt]
+{\large\itshape Causal Fingerprinting Oracle: A Multi-Agent Consensus Mechanism\\
+for Trustworthy On-Chain--Off-Chain Interoperability via\\
+Perturbation-Based Spectral Analysis}\\[12pt]
+\today
+\end{center}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{8pt}
+\noindent Dear Reviewer 2,
+
+\vspace{4pt}
+\noindent We sincerely thank you for your thorough and insightful review. Your detailed comments have helped us strengthen the organization and clarity of our manuscript. We have carefully addressed each concern, and the resulting revisions improve the paper's structure. Below we provide point-by-point responses.
+
+\vspace{12pt}
+
+%% ====================================================================
+\subsection*{Comment 1: Consensus Mechanisms Table in Related Works}
+
+\reviewercomment{Try to add a table in Section 2 (Related Works). The list of Consensus Mechanisms and the uses/applications and cite accordingly.}
+
+\response{We thank the reviewer for this constructive suggestion. A summary table of consensus mechanisms would help readers quickly compare different approaches and their applications.
+
+In the revised manuscript, we have added a new table in the Related Works section (Section 2) that systematically categorizes and compares consensus mechanisms across several dimensions:
+
+\begin{table}[h]
+\caption{Consensus Mechanisms: Categories, Applications, and Limitations.}
+\label{tab:consensus_mechanisms}
+\centering
+\begin{tabular}{l l l l}
+\toprule
+\textbf{Category} & \textbf{Mechanism} & \textbf{Applications} & \textbf{Limitations} \\
+\midrule
+Trust-Aware & EigenTrust & P2P reputation & Cold-start, no reasoning verification \\
+ & Beta Reputation & Distributed systems & Temporal inconsistency \\
+\midrule
+Game-Theoretic & Schelling Point & Prediction markets & Collusion susceptibility \\
+ & Commit-Reveal & Voting systems & Verification boundary \\
+\midrule
+Learning-Based & Krum & Federated learning & IID assumption \\
+ & Trimmed Mean & Distributed optimization & Static participants \\
+\midrule
+Formal BFT & PBFT & Blockchain databases & 33\% bound, $O(n^2)$ \\
+ & HotStuff & Blockchain & Linear view change \\
+\midrule
+Our Approach & CFO & AI oracle verification & Empirical only, no formal proofs \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+This table provides a comprehensive overview of existing consensus mechanisms, their application domains, and key limitations, while positioning CFO's contribution relative to prior work. Each entry includes appropriate citations to the relevant literature.}
+
+\revision{New Table~2 in Related Works section summarizing consensus mechanisms, applications, and limitations with citations.}
+
+%% ====================================================================
+\vspace{12pt}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{6pt}
+
+\noindent We hope these revisions adequately address your concerns. The added table strengthens the Related Works section by providing a clear comparative overview of consensus mechanisms. We are grateful for your constructive feedback.
+
+\vspace{12pt}
+\noindent Sincerely,\\
+The Authors
+
+\end{document}

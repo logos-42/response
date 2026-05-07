@@ -1,0 +1,119 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{amsmath}
+
+\definecolor{reviewercolor}{RGB}{0,0,160}
+\definecolor{responsecolor}{RGB}{0,100,0}
+
+\newcommand{\reviewercomment}[1]{%
+  \vspace{6pt}\noindent\textbf{\textcolor{reviewercolor}{Reviewer's Comment:}}\\
+  \textcolor{reviewercolor}{\itshape #1}\vspace{4pt}}
+
+\newcommand{\response}[1]{%
+  \noindent\textbf{\textcolor{responsecolor}{Authors' Response:}}\\
+  #1\vspace{8pt}}
+
+\newcommand{\revision}[1]{%
+  \noindent\textbf{Revision in Manuscript:} #1\vspace{4pt}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Response to Reviewer 1}\\[12pt]
+{\large Manuscript ID: electronics-4268609}\\[6pt]
+{\large\itshape Causal Fingerprinting Oracle: A Multi-Agent Consensus Mechanism\\
+for Trustworthy On-Chain--Off-Chain Interoperability via\\
+Perturbation-Based Spectral Analysis}\\[12pt]
+\today
+\end{center}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{8pt}
+\noindent Dear Reviewer 1,
+
+\vspace{4pt}
+\noindent We sincerely thank you for your thorough and insightful review. Your detailed comments have helped us strengthen the clarity and completeness of our manuscript. We have carefully addressed each concern, and the resulting revisions substantially improve the paper. Below we provide point-by-point responses.
+
+\vspace{12pt}
+
+%% ====================================================================
+\subsection*{Comment 1: Explicit Research Questions in Introduction}
+
+\reviewercomment{I wonder what your thoughts are on including the research questions explicitly in the Introduction section of the manuscript? At present they appear later, placing them early might help readers better understand the study's focus and objectives from the outset.}
+
+\response{We fully agree with the reviewer's suggestion. Research questions provide essential scaffolding for readers to understand the study's focus and objectives from the outset.
+
+In the revised manuscript, we have added a dedicated ``Research Questions'' paragraph in the Introduction section, immediately following the background discussion and before the proposed method overview. The research questions now appear at the beginning of the paper to guide readers through the motivation and evaluation framework:
+
+\begin{itemize}[nosep]
+\item \textbf{RQ1:} Can CFO achieve higher Byzantine fault tolerance (beyond 33\%) while maintaining high prediction accuracy?
+\item \textbf{RQ2:} Can causal fingerprints combined with spectral analysis effectively detect Byzantine nodes in high-noise, high-dynamic environments?
+\item \textbf{RQ3:} Can the system construct accurate causal graphs using LLMs and achieve reliable logical inference?
+\item \textbf{RQ4:} How do parameters (agent count, perturbation intensity, spectral dimensionality) affect performance?
+\end{itemize}
+
+These research questions directly map to our experimental evaluation sections, enabling readers to understand the evaluation structure from the outset.}
+
+\revision{Revised Introduction section with explicit research questions paragraph added before the CFO overview.}
+
+%% ====================================================================
+\subsection*{Comment 2: Data Availability and Code Repository}
+
+\reviewercomment{If possible, could you please upload the data file(s) online to GitHub (or any other suitable public repository such as Zenodo, Figshare, or OSF) to make the dataset more accessible and interesting for readers? This would greatly enhance the reproducibility and transparency of your work. If this is not feasible, kindly provide the reason in your response letter.}
+
+\response{We appreciate this suggestion and recognize its importance for reproducibility and transparency in scientific research.
+
+In the revised manuscript, we have added a \textbf{Data Availability Statement} in the Conclusions section. The implementation code, experimental data, and detailed parameter configurations will be made publicly available upon acceptance via a GitHub repository. We have also provided the repository URL in the revised manuscript to ensure reproducibility.
+
+If the public release is not possible during the review period due to blind review requirements, we commit to making all materials available immediately upon acceptance. Reviewers who require access to the code and data during review may contact the corresponding author for confidential access.}
+
+\revision{New Data Availability Statement in Conclusions section; GitHub repository URL added in revised manuscript.}
+
+%% ====================================================================
+\subsection*{Comment 3: Expanded Limitations and Future Research Directions}
+
+\reviewercomment{Kindly expand the Limitations section by adding a few more points, and include additional suggestions for future research directions. This would strengthen the manuscript by acknowledging remaining gaps and guiding subsequent studies in the field.}
+
+\response{We thank the reviewer for this constructive suggestion. A candid discussion of limitations is essential for proper scientific contribution assessment.
+
+In the revised manuscript, we have substantially expanded the Limitations section with the following additional points:
+
+\textbf{Limitations:}
+\begin{itemize}[nosep]
+\item \textbf{Perturbation Design Sensitivity:} The effectiveness of causal fingerprinting depends on the perturbation strategy. Poorly designed perturbations may fail to expose reasoning inconsistencies in sophisticated adversarial agents.
+\item \textbf{Adaptive Adversary Vulnerability:} The current evaluation considers static, non-adaptive adversaries. An adaptive adversary who learns the spectral analysis pipeline over multiple rounds could potentially evade detection.
+\item \textbf{Model Heterogeneity Assumption:} Spectral divergence may reflect genuine differences in model architecture or reasoning style rather than Byzantine behavior. Distinguishing structural inconsistency from legitimate heterogeneity remains challenging.
+\item \textbf{Scalability Constraints:} The $O(n^2)$ communication complexity and $K=5$ perturbation rounds impose practical limits on scalability. On-chain archival costs for fingerprint storage grow with agent count and perturbation dimensionality.
+\end{itemize}
+
+\textbf{Future Research Directions:}
+\begin{itemize}[nosep]
+\item \textbf{Adaptive Perturbation Strategies:} Developing reinforcement-learning-based perturbation generation that adapts to observed agent responses to maximize detection power.
+\item \textbf{Formal Security Analysis:} Establishing rigorous probabilistic or game-theoretic foundations for Byzantine detection guarantees under various adversarial models.
+\item \textbf{Cross-Domain Deployment:} Extending CFO to federated learning and multi-robot coordination scenarios with heterogeneous agent architectures.
+\item \textbf{Efficient Spectral Methods:} Investigating randomized SVD and sparse reconstruction techniques to reduce computational overhead for large-scale deployments.
+\end{itemize}}
+
+\revision{Expanded Limitations section with 4 new points; new Future Research Directions subsection with 4 directions.}
+
+%% ====================================================================
+\vspace{12pt}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{6pt}
+
+\noindent We hope these revisions adequately address your concerns. The changes strengthen the paper by adding explicit research questions, committing to public data availability, and providing a candid discussion of limitations and future work. We are grateful for your constructive feedback.
+
+\vspace{12pt}
+\noindent Sincerely,\\
+The Authors
+
+\end{document}
